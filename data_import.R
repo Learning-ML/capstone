@@ -1,8 +1,23 @@
-################################################################
-################################################################
-################### Loading the data frames ####################
-################################################################
-################################################################
+
+######################
+# Data Cleaning Code #
+######################
+
+
+
+
+###########################
+# Loading Libraries #
+###########################
+
+library(dplyr) # manipulate data frame
+library(tidyr) # restructure data frame
+
+
+###########################
+# Loading the data frames #
+###########################
+
 
 df1  <- read.csv("AMECO1.TXT", header = TRUE, sep = ';')  # Population and Employment
 df2  <- read.csv("AMECO2.TXT", header = TRUE, sep = ';')  # Consumption
@@ -61,7 +76,7 @@ df_all <- rbind(df1,
                 df16,
                 df17,
                 df18)
-library(dplyr)
+
 
 # create list of EU countries
 countries  = c('Austria', 'Belgium', 'Bulgaria','Cyprus','Croatia','Czech Republic','Denmark',
@@ -186,24 +201,116 @@ df_all <- df_all[!((df_all$TITLE == 'Gross domestic product at current prices pe
 # re-confirm there are 28 countries for each feature (Germany and West Germany are still separate)
 test <- df_all %>% group_by(TITLE) %>% summarize(count= n())
 
+
+#####################################
+# Remove X2018 and X (empty column) #
+#####################################
+
+df_all$X2018 <- NULL
+df_all$X     <- NULL
+
+############################################################
+# Creating New Germany (Combined Germany and West Germany) #
+############################################################
+
+# grab all observations with Germany or West Germany
+germany = df_all[df_all$COUNTRY=='Germany' | df_all$COUNTRY=='West Germany',]
+
+# impute NA's as 0's to sum 
+germany[is.na(germany)] = 0
+
+# Create empty data frame
+germany_df = matrix(ncol=dim(germany)[2]-5, nrow=dim(germany)[1])
+
+# combine values for Germany and West Germany
+for (i in seq(1,104,2)){
+  for (j in (6:dim(germany)[2]+1)){
+    germany_df[i,j-6] <- germany[i,j-1] + germany[i+1,j-1]
+  }
+}
+
+# convert back to origin df_all structure
+germany_df <- cbind(germany[,1:5], germany_df)
+
+# remove West Germany from germany_df
+germany_df <- germany_df[germany_df$COUNTRY != 'West Germany',]
+
+# get original column names
+names <- colnames(df_all)
+
+# rename column names
+colnames(germany_df) <- names
+
+################################################
+# remove Germany and West Germany from df_all  #
+################################################
+
+df_all <- df_all[!df_all$COUNTRY %in% c('West Germany', 'Germany'),]
+
+################################
+# rbind germany_df with df_all #
+################################
+
+df_all <- rbind(df_all, germany_df)
+
 ################################################
 # Calculate Growth Rates (Feature Engineering) #
 ################################################
 
-# calculate growth rates
-table1 = matrix(ncol=dim(df_all)[2]-1-6, nrow=dim(df_all)[1])
+# create empty data frame
+growth = matrix(ncol=dim(df_all)[2]-1-5, nrow=dim(df_all)[1])
 
+# calculate growth rates
 for (i in (1:dim(df_all)[1])) {
-  for (j in (6:dim(df_all)[2]-1)){
-    table1[i,j-6] <- (df_all[i,j]/df_all[i,j-1]-1)
+  for (j in (6:dim(df_all)[2])){
+    growth[i,j-6] <- (df_all[i,j]/df_all[i,j-1]-1)
   }
 } 
 
+# get original column names and remove column X1960 (we do not calculate growth for the first year)
+names_growth <- colnames(df_all)
+names_growth <- names_growth[-6]
+
+# convert back to origin df_all structure
+df_all <- cbind(df_all[,1:5], growth)
+
+# rename column names
+colnames(df_all) <- names_growth
+
+
+##############
+# Tidy Table #
+##############
+df_all[, c('CODE', 'SUB.CHAPTER', 'UNIT')] <- NULL
+
+df_all <- gather(df_all, key="year", value="value", 3:59)
+df_all <- spread(df_all, key=TITLE, value="value")
+
+
+#########################
+# Change Year to Numeric#
+#########################
+df_all$year <- as.numeric(gsub('X', '', df_all$year))
+
+
+###############################
+# Encode Feature Column Names #
+###############################
+feature_names <- colnames(df_all)[3:54]
+feature_code = c()
+  
+for (i in 1:52) {
+  feature_code=c(feature_code,paste0('f',i))
+}
+
+colnames(df_all)[3:54] <- feature_code
+
+#########################
+# Export to CSV      #
+#########################
+
+write.csv(df_all, 'df_all.csv', row.names = FALSE)
 
 
 
-library(tidyr)
-
-df1_tidy <- gather(df1, key="year", value="value", 6:65)
-df1_tidy1 <- spread(df1_tidy, key=TITLE, value="value")
 
