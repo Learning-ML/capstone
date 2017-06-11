@@ -305,11 +305,17 @@ for (i in 1:52) {
 
 colnames(df_all)[3:54] <- feature_code
 
+# create dataframe of feature code + feature name
+coded_features <- cbind(feature_code, feature_names)
+colnames(coded_features) <- c('code', 'feature')
+
 #########################
 # Export to CSV      #
 #########################
 
 write.csv(df_all, 'df_all.csv', row.names = FALSE)
+
+write.csv(coded_features, 'feature_codes.csv', row.names = FALSE)
 
 
 
