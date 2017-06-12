@@ -3,16 +3,12 @@
 # Data Cleaning Code #
 ######################
 
-
-
-
 ###########################
 # Loading Libraries #
 ###########################
 
 library(dplyr) # manipulate data frame
 library(tidyr) # restructure data frame
-
 
 ###########################
 # Loading the data frames #
@@ -38,24 +34,7 @@ df16 <- read.csv("AMECO16.TXT", header = TRUE, sep = ';') # General Government (
 df17 <- read.csv("AMECO17.TXT", header = TRUE, sep = ';') # Cyclical Adjustment of Public Finance Variables
 df18 <- read.csv("AMECO18.TXT", header = TRUE, sep = ';') # Gross Public Debt
 
-write.csv(df1 , file = "AMECO1.csv")
-write.csv(df2 , file = "AMECO2.csv")
-write.csv(df3 , file = "AMECO3.csv")
-write.csv(df4 , file = "AMECO4.csv")
-write.csv(df5 , file = "AMECO5.csv")
-write.csv(df6 , file = "AMECO6.csv")
-write.csv(df7 , file = "AMECO7.csv")
-write.csv(df8 , file = "AMECO8.csv")
-write.csv(df9 , file = "AMECO9.csv")
-write.csv(df10, file = "AMECO10.csv")
-write.csv(df11, file = "AMECO11.csv")
-write.csv(df12, file = "AMECO12.csv")
-write.csv(df13, file = "AMECO13.csv")
-write.csv(df14, file = "AMECO14.csv")
-write.csv(df15, file = "AMECO15.csv")
-write.csv(df16, file = "AMECO16.csv")
-write.csv(df17, file = "AMECO17.csv")
-write.csv(df18, file = "AMECO18.csv")
+
 
 # Rbind tables
 df_all <- rbind(df1,
@@ -95,45 +74,7 @@ features = c('Total population ', 'Population: 0 to 14 years ',  'Population: 15
 df_all <- df_all[df_all$TITLE %in% features, ]
 
 #########################################################
-# Attempt 1 to identify common features among all countries (DO NOT USE)
-#########################################################
-
-# examine number of distinct features in each country; determined that Germany's features would be used since it has the least number
-test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
-
-# identify the subset of features missing in Germany; validate features discarded are not important
-ger_features <- (df_all %>% filter(COUNTRY=='Germany') %>% group_by(TITLE) %>% summarize(count = n()))[,1]
-leftover_features_ger <- features[!(features %in% ger_features$TITLE)]
-
-# discarded features
-# [1] "Price deflator private final consumption expenditure "                              
-# [2] "Net returns on net capital stock: total economy "                                   
-# [3] "Total factor productivity: total economy "                                          
-# [4] "Terms of trade goods and services (National accounts) "                             
-# [5] "ECU-EUR exchange rates (annual averages) :- Units of national currency per EUR/ECU "
-# [6] "Conversion rates between euro and former euro-zone national currencies "
-
-# filter all countries by Germany's features
-df_all <- df_all %>% filter(TITLE %in% ger_features$TITLE)
-
-# re-examine number of features for each country
-test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
-
-# identify the subset of features missing in Germany; validate features discarded are not important
-rom_features <- (df_all %>% filter(COUNTRY=='Romania') %>% group_by(TITLE) %>% summarize(count = n()))[,1]
-leftover_features_rom <- ger_features$TITLE[!(ger_features$TITLE %in% rom_features$TITLE)]
-
-# discarded features
-# [1] Civilian employment, persons (national) 
-
-#filter all countries by Romania's features
-test <- df_all %>% filter(TITLE %in% rom_features$TITLE)
-
-# re-examine number of features for each country
-test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
-
-#########################################################
-# Attempt 2 to identify common features among all countries
+# Identify common features among all countries
 #########################################################
 
 # identify number of countries for each feature
@@ -253,6 +194,34 @@ df_all <- df_all[!df_all$COUNTRY %in% c('West Germany', 'Germany'),]
 
 df_all <- rbind(df_all, germany_df)
 
+###########################
+# Tidy Table (Pre-Growth) #
+###########################
+
+df_all_pregrowth <- df_all
+df_all_pregrowth[, c('CODE', 'SUB.CHAPTER', 'UNIT')] <- NULL
+df_all_pregrowth <- gather(df_all_pregrowth, key="year", value="value", 3:60)
+df_all_pregrowth <- spread(df_all_pregrowth, key=TITLE, value="value")
+
+# Clean year column
+df_all_pregrowth$year <- as.numeric(gsub('X', '', df_all_pregrowth$year))
+
+############################################
+# Encode Feature Column Names (Pre-Growth) #
+############################################
+feature_names <- colnames(df_all_pregrowth)[3:54]
+feature_code = c()
+
+for (i in 1:52) {
+  feature_code=c(feature_code,paste0('f',i))
+}
+
+colnames(df_all_pregrowth)[3:54] <- feature_code
+
+# create dataframe of feature code + feature name
+coded_features <- cbind(feature_code, feature_names)
+colnames(coded_features) <- c('code', 'feature')
+
 ################################################
 # Calculate Growth Rates (Feature Engineering) #
 ################################################
@@ -286,7 +255,6 @@ df_all[, c('CODE', 'SUB.CHAPTER', 'UNIT')] <- NULL
 df_all <- gather(df_all, key="year", value="value", 3:59)
 df_all <- spread(df_all, key=TITLE, value="value")
 
-
 #########################
 # Change Year to Numeric#
 #########################
@@ -305,18 +273,80 @@ for (i in 1:52) {
 
 colnames(df_all)[3:54] <- feature_code
 
-# create dataframe of feature code + feature name
-coded_features <- cbind(feature_code, feature_names)
-colnames(coded_features) <- c('code', 'feature')
-
 #########################
 # Export to CSV      #
 #########################
 
+# growth csv
 write.csv(df_all, 'df_all.csv', row.names = FALSE)
 
+# pre-growth csv
+write.csv(df_all_pregrowth, 'df_all_pregrowth.csv', row.names = FALSE)
+
+# coded features
 write.csv(coded_features, 'feature_codes.csv', row.names = FALSE)
 
+# original macro tables
+write.csv(df1 , file = "AMECO1.csv")
+write.csv(df2 , file = "AMECO2.csv")
+write.csv(df3 , file = "AMECO3.csv")
+write.csv(df4 , file = "AMECO4.csv")
+write.csv(df5 , file = "AMECO5.csv")
+write.csv(df6 , file = "AMECO6.csv")
+write.csv(df7 , file = "AMECO7.csv")
+write.csv(df8 , file = "AMECO8.csv")
+write.csv(df9 , file = "AMECO9.csv")
+write.csv(df10, file = "AMECO10.csv")
+write.csv(df11, file = "AMECO11.csv")
+write.csv(df12, file = "AMECO12.csv")
+write.csv(df13, file = "AMECO13.csv")
+write.csv(df14, file = "AMECO14.csv")
+write.csv(df15, file = "AMECO15.csv")
+write.csv(df16, file = "AMECO16.csv")
+write.csv(df17, file = "AMECO17.csv")
+write.csv(df18, file = "AMECO18.csv")
+ 
 
+#########################################################
+# Appendix
+#########################################################
+
+#########################################################
+# Attempt 1 to identify common features among all countries (DO NOT USE)
+#########################################################
+
+# examine number of distinct features in each country; determined that Germany's features would be used since it has the least number
+test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
+
+# identify the subset of features missing in Germany; validate features discarded are not important
+ger_features <- (df_all %>% filter(COUNTRY=='Germany') %>% group_by(TITLE) %>% summarize(count = n()))[,1]
+leftover_features_ger <- features[!(features %in% ger_features$TITLE)]
+
+# discarded features
+# [1] "Price deflator private final consumption expenditure "                              
+# [2] "Net returns on net capital stock: total economy "                                   
+# [3] "Total factor productivity: total economy "                                          
+# [4] "Terms of trade goods and services (National accounts) "                             
+# [5] "ECU-EUR exchange rates (annual averages) :- Units of national currency per EUR/ECU "
+# [6] "Conversion rates between euro and former euro-zone national currencies "
+
+# filter all countries by Germany's features
+df_all <- df_all %>% filter(TITLE %in% ger_features$TITLE)
+
+# re-examine number of features for each country
+test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
+
+# identify the subset of features missing in Germany; validate features discarded are not important
+rom_features <- (df_all %>% filter(COUNTRY=='Romania') %>% group_by(TITLE) %>% summarize(count = n()))[,1]
+leftover_features_rom <- ger_features$TITLE[!(ger_features$TITLE %in% rom_features$TITLE)]
+
+# discarded features
+# [1] Civilian employment, persons (national) 
+
+#filter all countries by Romania's features
+test <- df_all %>% filter(TITLE %in% rom_features$TITLE)
+
+# re-examine number of features for each country
+test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
 
 
