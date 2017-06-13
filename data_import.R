@@ -350,3 +350,57 @@ test <- df_all %>% filter(TITLE %in% rom_features$TITLE)
 test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
 
 
+#######################################################################
+#######################################################################
+######################### Time Series #################################
+
+
+install.packages('forecast') # time series EDA package
+install.packages('xts') # convert a data frame to a time series
+install.packages('TSA') # detect seasonality using Fourier Transform
+
+library(forecast)
+library(xts)
+library(TSA)
+
+# create a subset of df_all with country, year, top 5 features and GDP
+
+df_all_ts = df_all[c('COUNTRY','year','f7', 'f10', 'f14', 'f15', 'f20','f21')]
+
+
+# Create a subset of Greece for TS
+greece_ts = df_all_ts %>% filter(COUNTRY == 'Greece')
+
+# converting the table to a time series object - changing the index of the table to years
+greece_ts = xts(greece_ts$f20, as.Date(paste0(greece_ts$year, '-01-01')))
+
+# ploting the time series for f20
+plot(greece_ts)
+
+
+# The additive model is most appropriate if the magnitude of the seasonal 
+# fluctuations or the variation around the trend-cycle does not vary with the level 
+# of the time series. When the variation in the seasonal pattern, or the variation 
+# around the trend-cycle, appears to be proportional to the level of the time series, 
+# then a multiplicative model is more appropriate. With economic time series, 
+# multiplicative models are common.
+
+
+
+# Detecting seasonality frequency
+p = periodogram(greece_ts)
+dd = data.frame(freq=p$freq, spec=p$spec)
+order = dd[order(-dd$spec),]
+top5 = head(order, 5)
+
+
+
+trend_greece_f20 = ma(greece_ts, order = 4, centre = T)
+lines(trend_greece_f20)
+plot(trend_greece_f20)
+
+
+
+
+
+
