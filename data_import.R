@@ -363,31 +363,27 @@ write.csv(df18, file = "AMECO18.csv")
 #########################################################
 
 
-library(FSelector) #For method
+library(FSelector) # For method
 
+#choosing the features that we want to use for predicting GDP + the GDP column
 df_all_chi = df_all[,-c(1:2)]
 
 
 #Calculate the chi square statistics 
 weights<- chi.squared(f21~., df_all_chi)
 
-
 # Print the results 
 print(weights)
 
-
 # Select top five variables
-subset<- cutoff.k(weights, 5)
-
+subset<- cutoff.k(weights, 15)
 
 # Print the final formula that can be used in classification
 f<- as.simple.formula(subset, "Class")
 print(f)
 
-
-
-
-
+#Class ~ f20 + f17 + f16 + f18 + f19 + f14 + f7 + f15 + f9 + f8 + 
+#f24 + f27 + f10 + f6 + f12
 
 #########################################################
 # Appendix
