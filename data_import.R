@@ -533,13 +533,13 @@ forcast_table = df_all_ts
 
 
 # creates empty data frame
-forecast_table = data.frame("COUNTRY" = character(0),
-                            "YEAR" = integer(0),
-                            "f7" = numeric(0),
-                            "f10" = numeric(0),
-                            "f14" = numeric(0),
-                            "f15" = numeric(0),
-                            "f20" = numeric(0)
+forecast_table = data.frame("COUNTRY" = numeric(20),
+                            "YEAR" = integer(20),
+                            "f7" = numeric(20),
+                            "f10" = numeric(20),
+                            "f14" = numeric(20),
+                            "f15" = numeric(20),
+                            "f20" = numeric(20)
                             )
 
 value_list = c()
@@ -553,7 +553,8 @@ x = c('Greece','Italy')
       forecast <- forecast(fit_test,h=4)[[4]][1:4]
       for (val in forecast){
         #forecast_table[ ]  = i #country
-        value_list = value_list + val
+        forecast_table[]
+        print (val)
       }
       #print(forecast(fit_test,h=4)[[4]][1])
       #print(adf.test(na.omit(i_ts[,j]), alternative = 'stationary'))
@@ -574,10 +575,369 @@ forcast_values('Spain')
 # multiplicative models are common.
 
 
+# test codes section
+
+x = c('Greece','Italy')
+y = c('f7', 'f10', 'f14', 'f15', 'f20')
+# function that creates forcast for each of the features
+#forcast_values = function(x){ 
+#for (i in (1:length(x))){
+  for (j in (1:length(y))){
+    i_ts = df_all_ts %>% filter(COUNTRY == 'Greece')
+    fit_test <- auto.arima(i_ts[,2+j],seasonal=FALSE)
+    forecast <- forecast(fit_test,h=4)[[4]][1:4]
+    for (c in (1:length(forecast))){
+      # country
+      forecast_table[c,1]  = x[i]
+      #forecast_table[c,1]  = x[i]
+      #forecast_table[c,1]  = x[i]
+      #forecast_table[c,1]  = x[i]
+      
+      # year 
+      forecast_table[(c),2] = c
+      # feautres
+      forecast_table[(c),2+c] = forecast[c]
+
+      #print (c)
+    }
+    #print(forecast(fit_test,h=4)[[4]][1])
+    #print(adf.test(na.omit(i_ts[,j]), alternative = 'stationary'))
+    #print(kpss.test(na.omit(i_ts[,j])))
+  }
+#}
+#######################################################################
+######## creating a test table with predictions for Greece ############
+#######################################################################
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Greece')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Greece','Greece','Greece','Greece')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_greece = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+greece_f = cbind(country,year,forecast_greece)
+
+
+
+##############################################################################################
+
+######## creating a test table with predictions for Italy ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Italy')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Italy','Italy','Italy','Italy')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Italy = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Italy_f = cbind(country,year,forecast_Italy)
+
+
+
+##############################################################################################
+######## creating a test table with predictions for Spain ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Spain')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Spain','Spain','Spain','Spain')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Spain = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Spain_f = cbind(country,year,forecast_Spain)
+
+
+
+##############################################################################################
+######## creating a test table with predictions for Croatia ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Croatia')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Croatia','Croatia','Croatia','Croatia')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Croatia = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Croatia_f = cbind(country,year,forecast_Croatia)
+
+
+
+##############################################################################################
+######## creating a test table with predictions for Cyprus ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Cyprus')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Cyprus','Cyprus','Cyprus','Cyprus')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Cyprus = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Cyprus_f = cbind(country,year,forecast_Cyprus)
+
+
+
+##############################################################################################
+######## creating a test table with predictions for United Kingdom ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='United Kingdom')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('United Kingdom','United Kingdom','United Kingdom','United Kingdom')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_United_Kingdom = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+United_Kingdom_f = cbind(country,year,forecast_United_Kingdom)
+
+
+##############################################################################################
+######## creating a test table with predictions for Portugal ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Portugal')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Portugal','Portugal','Portugal','Portugal')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Portugal = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Portugal_f = cbind(country,year,forecast_Portugal)
+
+
+
+##############################################################################################
+######## creating a test table with predictions for Slovenia ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Slovenia')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+
+
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Slovenia','Slovenia','Slovenia','Slovenia')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Slovenia = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Slovenia_f = cbind(country,year,forecast_Slovenia)
 
 
 
 
 
+##############################################################################################
+######## creating a test table with predictions for Czech Republic ############
+
+i_ts = df_all_ts %>% filter(COUNTRY =='Czech Republic')
+
+fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+
+fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+
+fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
 
 
+fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
+country = c('Czech Republic','Czech Republic','Czech Republic','Czech Republic')
+
+year = c(2018,2019,2020,2021)
+# 
+forecast_Czech_Republic = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
+
+Czech_Republic_f = cbind(country,year,forecast_Czech_Republic)
+
+
+
+##############################################################################################
+# concatenating all the tables to 1 table
+
+df_all_forecast = rbind(greece_f,Italy_f,Spain_f,Croatia_f,Cyprus_f,United_Kingdom_f,Portugal_f,Slovenia_f,Czech_Republic_f)
+
+colnames(df_all_forecast) <- c('COUNTRY', 'year', 'f7', 'f10', 'f14', 'f15', 'f20')
+
+
+df_all_full = rbind(df_all_ts[,1:7], df_all_forecast)
+##############################################################################################
+######## creating a table with 
+
+x= c('Greece','Italy','Spain')
+
+for (i in (1:length(x))){
+  
+  i_ts = df_all_ts %>% filter(COUNTRY == i)
+  
+  fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
+  forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
+  
+  fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
+  forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
+  
+  fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
+  forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
+  
+  
+  fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
+  forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
+  
+  
+  fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+  forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+  
+  country = c(i,i,i,i)
+
+  
+  forecast_i = c(forecast7,forecast10,forecast14,forecast15,forecast20)
+  
+  print(cbind(country, year,forecast_i))
+  
+  
+} 
+  
