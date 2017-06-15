@@ -575,40 +575,14 @@ forcast_values('Spain')
 # multiplicative models are common.
 
 
-# test codes section
 
-x = c('Greece','Italy')
-y = c('f7', 'f10', 'f14', 'f15', 'f20')
-# function that creates forcast for each of the features
-#forcast_values = function(x){ 
-#for (i in (1:length(x))){
-  for (j in (1:length(y))){
-    i_ts = df_all_ts %>% filter(COUNTRY == 'Greece')
-    fit_test <- auto.arima(i_ts[,2+j],seasonal=FALSE)
-    forecast <- forecast(fit_test,h=4)[[4]][1:4]
-    for (c in (1:length(forecast))){
-      # country
-      forecast_table[c,1]  = x[i]
-      #forecast_table[c,1]  = x[i]
-      #forecast_table[c,1]  = x[i]
-      #forecast_table[c,1]  = x[i]
-      
-      # year 
-      forecast_table[(c),2] = c
-      # feautres
-      forecast_table[(c),2+c] = forecast[c]
-
-      #print (c)
-    }
-    #print(forecast(fit_test,h=4)[[4]][1])
-    #print(adf.test(na.omit(i_ts[,j]), alternative = 'stationary'))
-    #print(kpss.test(na.omit(i_ts[,j])))
-  }
-#}
 #######################################################################
+######## creating a test table with predictions for the risky countries
+#######################################################################
+
 ######## creating a test table with predictions for Greece ############
-#######################################################################
 
+# subseting df_all_ts to select risky countries
 i_ts = df_all_ts %>% filter(COUNTRY =='Greece')
 
 fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
@@ -631,7 +605,7 @@ forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
 country = c('Greece','Greece','Greece','Greece')
 
 year = c(2018,2019,2020,2021)
-# 
+
 forecast_greece = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
 
 greece_f = cbind(country,year,forecast_greece)
@@ -702,8 +676,7 @@ forecast_Spain = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
 Spain_f = cbind(country,year,forecast_Spain)
 
 
-
-##############################################################################################
+########################################################################
 ######## creating a test table with predictions for Croatia ############
 
 i_ts = df_all_ts %>% filter(COUNTRY =='Croatia')
@@ -735,7 +708,7 @@ Croatia_f = cbind(country,year,forecast_Croatia)
 
 
 
-##############################################################################################
+#######################################################################
 ######## creating a test table with predictions for Cyprus ############
 
 i_ts = df_all_ts %>% filter(COUNTRY =='Cyprus')
@@ -767,7 +740,7 @@ Cyprus_f = cbind(country,year,forecast_Cyprus)
 
 
 
-##############################################################################################
+###############################################################################
 ######## creating a test table with predictions for United Kingdom ############
 
 i_ts = df_all_ts %>% filter(COUNTRY =='United Kingdom')
@@ -861,9 +834,6 @@ forecast_Slovenia = cbind(forecast7,forecast10,forecast14,forecast15,forecast20)
 Slovenia_f = cbind(country,year,forecast_Slovenia)
 
 
-
-
-
 ##############################################################################################
 ######## creating a test table with predictions for Czech Republic ############
 
@@ -896,48 +866,28 @@ Czech_Republic_f = cbind(country,year,forecast_Czech_Republic)
 
 
 
-##############################################################################################
-# concatenating all the tables to 1 table
+#######################################################
+############### concatenating all the tables to 1 table
 
-df_all_forecast = rbind(greece_f,Italy_f,Spain_f,Croatia_f,Cyprus_f,United_Kingdom_f,Portugal_f,Slovenia_f,Czech_Republic_f)
+df_all_forecast = rbind(greece_f,Italy_f,Spain_f,Croatia_f,Cyprus_f,
+                        United_Kingdom_f,Portugal_f,Slovenia_f,Czech_Republic_f)
 
 colnames(df_all_forecast) <- c('COUNTRY', 'year', 'f7', 'f10', 'f14', 'f15', 'f20')
 
 
 df_all_full = rbind(df_all_ts[,1:7], df_all_forecast)
-##############################################################################################
-######## creating a table with 
 
-x= c('Greece','Italy','Spain')
 
-for (i in (1:length(x))){
-  
-  i_ts = df_all_ts %>% filter(COUNTRY == i)
-  
-  fit_test7 <- auto.arima(i_ts[,'f7'],seasonal=FALSE)
-  forecast7 <- forecast(fit_test7,h=4)[[4]][1:4]
-  
-  fit_test10 <- auto.arima(i_ts[,'f10'],seasonal=FALSE)
-  forecast10 <- forecast(fit_test10,h=4)[[4]][1:4]
-  
-  fit_test14 <- auto.arima(i_ts[,'f14'],seasonal=FALSE)
-  forecast14 <- forecast(fit_test14,h=4)[[4]][1:4]
-  
-  
-  fit_test15 <- auto.arima(i_ts[,'f15'],seasonal=FALSE)
-  forecast15 <- forecast(fit_test15,h=4)[[4]][1:4]
-  
-  
-  fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
-  forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
-  
-  country = c(i,i,i,i)
 
-  
-  forecast_i = c(forecast7,forecast10,forecast14,forecast15,forecast20)
-  
-  print(cbind(country, year,forecast_i))
-  
-  
-} 
-  
+countries_in_risk  = c('Cyprus','Croatia','Czech Republic','Greece' ,
+                       'Italy','Portugal','Slovenia', 'Spain','United Kingdom')
+
+# filter df_all by EU countries
+df_all_full <- df_all_full[df_all_full$COUNTRY %in% countries_in_risk, ]
+
+
+# export the table to csv
+write.csv(df_all_full,file = 'df_all_full.csv', row.names = FALSE)
+
+
+
