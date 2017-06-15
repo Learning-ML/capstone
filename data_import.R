@@ -436,24 +436,134 @@ test <- df_all %>% group_by(COUNTRY) %>% summarise(count = n_distinct(TITLE))
 install.packages('forecast') # time series EDA package
 install.packages('xts') # convert a data frame to a time series
 install.packages('TSA') # detect seasonality using Fourier Transform
+install.packages('tseries') # Dickey Fuller and KPSS test for stationarity
 
 library(forecast)
 library(xts)
 library(TSA)
+library(tseries)
 
 # create a subset of df_all with country, year, top 5 features and GDP
 
 df_all_ts = df_all[c('COUNTRY','year','f7', 'f10', 'f14', 'f15', 'f20','f21')]
 
+##### Greece TS Analysis
+# Create a subset of Greece for TS
+greece_ts = df_all_ts %>% filter(COUNTRY == 'Greece')
+
+
+adf.test(greece_ts$f7, alternative = 'stationary')
+
+# Augmented Dickey-Fuller Test
+
+# data:  greece_ts$f7
+# Dickey-Fuller = -3.8576, Lag order = 3, p-value = 0.02213
+# alternative hypothesis: stationary
+
+
+adf.test(greece_ts$f10, alternative = 'stationary')
+
+# Augmented Dickey-Fuller Test
+
+# data:  greece_ts$f10
+# Dickey-Fuller = -2.8196, Lag order = 3, p-value = 0.244
+# alternative hypothesis: stationary
+
+# for loop to find if each of the selected features in each 
+# of the selected countries are stationary
+
+# list of risky countries from unsupervised learning (k-means clustering)
+
+countries_ts = c('Croatia', 'Cyprus', 'Czech Republic', 'Greece', 'Italy', 'Portugal', 
+      'Slovenia', 'Spain', 'United Kingdom')
+
+#function for checking stationarity with Dickey-Fuller and KPSS
+stationary_check = function(x){ 
+  for (i in x){
+    for (j in c('f7', 'f10', 'f14', 'f15', 'f20')){
+      i_ts = df_all_ts %>% filter(COUNTRY == i)
+      print(i)
+      print(j)
+      print(adf.test(na.omit(i_ts[,j]), alternative = 'stationary'))
+      print(kpss.test(na.omit(i_ts[,j])))
+    }
+  }
+}
+
+stationary_check(countries_ts)
+
+###############################################################################
+################# Since we have taken the growth rates for each of the features,
+# this essentially acts as a form of differencing, and we expect these growth rates
+# to show stationarity.
+
+# Given the small sample size for each feature (60 or less observations), we cannot reliably
+# interpret the results of the Dickey-Fuller Test or KPSS test for checking stationarity.
+# We will proceed with the forecast with the assumption that growth rates of macroeconomic
+# metrics are generally stationary (based on our visual judgment)
+
+################## create more graphs later!!!!!!!!!
 
 # Create a subset of Greece for TS
 greece_ts = df_all_ts %>% filter(COUNTRY == 'Greece')
+
 
 # converting the table to a time series object - changing the index of the table to years
 greece_ts = xts(greece_ts$f20, as.Date(paste0(greece_ts$year, '-01-01')))
 
 # ploting the time series for f20
 plot(greece_ts)
+
+
+
+#################################################
+################ ARIMA modeling #################
+
+
+fit <- auto.arima(greece_ts,seasonal=FALSE)
+forecast(fit_test,h=4)
+
+
+greece_ts_f7 = xts(greece_ts$f7, as.Date(paste0(greece_ts$year, '-01-01')))
+fit_test <- auto.arima(greece_ts$f7,seasonal=FALSE)
+fit_test <- auto.arima(greece_ts$f20,seasonal=FALSE)
+
+# function that creates forcast for each of the features
+forcast_table = df_all_ts
+
+
+# creates empty data frame
+forecast_table = data.frame("COUNTRY" = character(0),
+                            "YEAR" = integer(0),
+                            "f7" = numeric(0),
+                            "f10" = numeric(0),
+                            "f14" = numeric(0),
+                            "f15" = numeric(0),
+                            "f20" = numeric(0)
+                            )
+
+value_list = c()
+x = c('Greece','Italy')
+# function that creates forcast for each of the features
+#forcast_values = function(x){ 
+  for (i in x){
+    for (j in c('f7', 'f10', 'f14', 'f15', 'f20')){
+      i_ts = df_all_ts %>% filter(COUNTRY == i)
+      fit_test <- auto.arima(i_ts[,j],seasonal=FALSE)
+      forecast <- forecast(fit_test,h=4)[[4]][1:4]
+      for (val in forecast){
+        #forecast_table[ ]  = i #country
+        value_list = value_list + val
+      }
+      #print(forecast(fit_test,h=4)[[4]][1])
+      #print(adf.test(na.omit(i_ts[,j]), alternative = 'stationary'))
+      #print(kpss.test(na.omit(i_ts[,j])))
+    }
+  }
+#}
+
+forcast_values('Spain')
+
 
 
 # The additive model is most appropriate if the magnitude of the seasonal 
@@ -465,17 +575,6 @@ plot(greece_ts)
 
 
 
-# Detecting seasonality frequency
-p = periodogram(greece_ts)
-dd = data.frame(freq=p$freq, spec=p$spec)
-order = dd[order(-dd$spec),]
-top5 = head(order, 5)
-
-
-
-trend_greece_f20 = ma(greece_ts, order = 4, centre = T)
-lines(trend_greece_f20)
-plot(trend_greece_f20)
 
 
 
