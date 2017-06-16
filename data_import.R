@@ -877,6 +877,8 @@ colnames(df_all_forecast) <- c('COUNTRY', 'year', 'f7', 'f10', 'f14', 'f15', 'f2
 
 df_all_full = rbind(df_all_ts[,1:7], df_all_forecast)
 
+df_all_target = df_all_ts[,c(1,2,8)]
+
 
 
 countries_in_risk  = c('Cyprus','Croatia','Czech Republic','Greece' ,
@@ -885,9 +887,11 @@ countries_in_risk  = c('Cyprus','Croatia','Czech Republic','Greece' ,
 # filter df_all by EU countries
 df_all_full <- df_all_full[df_all_full$COUNTRY %in% countries_in_risk, ]
 
+df_all_target <- df_all_target[df_all_target$COUNTRY %in% countries_in_risk, ]
 
-# export the table to csv
+
+# export the tables to csv
 write.csv(df_all_full,file = 'df_all_full.csv', row.names = FALSE)
 
-
+write.csv(df_all_target,file = 'df_all_target.csv', row.names = FALSE)
 
