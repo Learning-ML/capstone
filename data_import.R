@@ -895,3 +895,79 @@ write.csv(df_all_full,file = 'df_all_full.csv', row.names = FALSE)
 
 write.csv(df_all_target,file = 'df_all_target.csv', row.names = FALSE)
 
+
+
+
+##############################
+########### EDA ##############
+##############################
+
+
+#Subst the top countries from 1998
+df_all_siug = df_all %>% 
+  filter(year > 1997 & COUNTRY %in% c('Germany', 'Italy', 'France', 'United Kingdom','Spain'))
+
+#subset 2017
+df_all_country = df_all %>% 
+  filter(year == 2017)
+
+
+# Nominal short-term interest rates Growth
+
+ggplot(df_all_siug, aes(x = year, y = df_all_siug$`Nominal short-term interest rates `)) + 
+  geom_line(aes(color = COUNTRY),stat = 'identity') + 
+  ylab('Nominal short-term interest rates Growth') + 
+  ggtitle('Nominal short-term interest rates Growth') + facet_grid(. ~ COUNTRY)
+
+# GDP Growth
+
+ggplot(df_all_siug, aes(x = year, y = df_all_siug$`Gross domestic product at current prices `)) + 
+  geom_line(aes(color = COUNTRY),stat = 'identity') + 
+  ylab('GDP Growth') + 
+  ggtitle('GDP Growth') + facet_grid(. ~ COUNTRY)
+
+
+# Unemployment Growth
+
+ggplot(df_all_siug, aes(x = year, y = df_all_siug$`Unemployment rate: total :- Member States: definition EUROSTAT `)) + 
+  geom_line(aes(color = COUNTRY),stat = 'identity') + 
+  ylab('Unemployment rate Growth') + 
+  ggtitle('Unemployment rate Growth') + facet_grid(. ~ COUNTRY)
+
+
+# Net exports Growth
+
+ggplot(df_all_siug, aes(x = year, y = df_all_siug$`Net exports of goods and services at current prices (National accounts) `)) + 
+  geom_line(aes(color = COUNTRY),stat = 'identity') + 
+  ylab('Net exports Growth') + 
+  ggtitle('Net exports Growth') + facet_grid(. ~ COUNTRY)
+
+# Government consumption
+
+ggplot(df_all_siug, aes(x = year, y = df_all_siug$`Collective consumption of general government at current prices `)) + 
+  geom_line(aes(color = COUNTRY),stat = 'identity') + 
+  ylab('Government consumption') + 
+  ggtitle('Government consumption') + facet_grid(. ~ COUNTRY)
+
+
+# Consumption Growth 2016
+
+ggplot(df_all_country, aes(x = reorder(COUNTRY,-df_all_country$`Consumption of fixed capital at current prices: total economy `),
+                           y = df_all_country$`Consumption of fixed capital at current prices: total economy `)) + 
+  geom_bar(stat = 'identity') + 
+  ylab('Consumption Growth') + 
+  xlab('Countries') + 
+  ggtitle('Consumption Growth 2016') +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+#+ facet_grid(. ~ COUNTRY)
+
+# Consumption Growth 2016
+
+ggplot(df_all_country, aes(x = reorder(COUNTRY,-df_all_country$`Subsidies: total economy `),
+                           y = df_all_country$`Subsidies: total economy `)) + 
+  geom_bar(stat = 'identity') + 
+  ylab('Subsidies: total economy') + 
+  xlab('Countries') + 
+  ggtitle('Subsidies: total economy 2017') +
+  theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+#+ facet_grid(. ~ COUNTRY)
