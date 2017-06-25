@@ -897,6 +897,14 @@ write.csv(df_all_target,file = 'df_all_target.csv', row.names = FALSE)
 
 
 
+#############################
+############# GDP Time series 
+#############################
+
+
+fit_test20 <- auto.arima(i_ts[,'f20'],seasonal=FALSE)
+forecast20 <- forecast(fit_test20,h=4)[[4]][1:4]
+
 
 ##############################
 ########### EDA ##############
@@ -971,3 +979,64 @@ ggplot(df_all_country, aes(x = reorder(COUNTRY,-df_all_country$`Subsidies: total
   ggtitle('Subsidies: total economy 2017') +
   theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
 #+ facet_grid(. ~ COUNTRY)
+
+
+######################################
+######### UK | Italy | Spain #########
+# Forecast of GDP using Auto.ARIMA
+
+
+df_all_3countries = df_all[df_all$COUNTRY=='United Kingdom' | 
+                   df_all$COUNTRY=='Italy' | 
+                   df_all$COUNTRY=='Spain',]
+
+
+# Italy
+gdp_italy = df_all_3countries[df_all_3countries$COUNTRY=='Italy',]
+gdp_italy = gdp_italy['f21']
+fit_test_italy <- auto.arima(gdp_italy,seasonal=FALSE)
+forecast_italy <- forecast(fit_test_italy,h=4)[[4]][1:4]
+forecast_italy
+ 
+# [1] 0.01471222 0.01392216 0.01368122 0.01360775
+
+# Spain
+gdp_spain = df_all_3countries[df_all_3countries$COUNTRY=='Spain',]
+gdp_spain = gdp_spain['f21']
+fit_test_spain <- auto.arima(gdp_spain,seasonal=FALSE)
+forecast_spain <- forecast(fit_test_spain,h=4)[[4]][1:4]
+forecast_spain
+
+# [1] 0.03248057 0.03025547 0.02945849 0.02917302
+
+# United Kingdom -unadjusted data
+gdp_uk = df_all_3countries[df_all_3countries$COUNTRY=='United Kingdom',]
+gdp_uk = gdp_uk['f21']
+fit_test_uk <- auto.arima(gdp_uk,seasonal=FALSE)
+forecast_uk <- forecast(fit_test_uk,h=4)[[4]][1:4]
+forecast_uk
+
+# [1] 0.05107902 0.03925962 0.03925962 0.03925962
+
+####################
+### UK Adjusted data
+####################
+df_uk_gdp  <- read.csv("UKNGDP.csv", header = TRUE, sep = ',') 
+
+
+# create a growth 
+gdp_growth = c()
+for (i in (2:length(df_uk_gdp$UKNGDP))){
+  value = (df_uk_gdp$UKNGDP[i]-df_uk_gdp$UKNGDP[i-1])/df_uk_gdp$UKNGDP[i-1]
+  gdp_growth = c(gdp_growth,value)
+  
+}
+
+
+df_uk_gdp = cbind(df_uk_gdp[2:63,],gdp_growth)
+gdp_uk = df_uk_gdp['gdp_growth']
+fit_test_uk <- auto.arima(gdp_uk,seasonal=FALSE)
+forecast_uk <- forecast(fit_test_uk,h=4)[[4]][1:4]
+forecast_uk
+
+# [1] 0.03608080 0.03786476 0.03786476 0.03786476
